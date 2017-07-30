@@ -17,7 +17,7 @@
     <div class="details-container">
       <div class="description">
         Click anywhere to create a point.<br><br>
-        <select class="select-algo" name="algo">
+        <select id="select-algo" class="select-algo" name="algo">
           <option value="1">Prim's algorithm</option>
           <option value="2">Kruskal's algorithm</option>
         </select>
@@ -29,6 +29,8 @@
 
     <canvas id="canvas" class="main-canvas" resize></canvas>
 
+    <script type="text/javascript" src="../js/constants.js" canvas="canvas"></script>
+    <script type="text/javascript" src="../js/minheap.js" canvas="canvas"></script>
     <script type="text/paperscript" src="../js/script.js" canvas="canvas"></script>
   </body>
 </html>

@@ -31,10 +31,20 @@ function onMouseDown(event) {
       return this.x == that.x && this.y == that.y
     }
   });
-
-  edgesLayer.activate();
-  edgesLayer.removeChildren();
 };
+
+// edgesLayer.activate();
+// edgesLayer.removeChildren();
+
+$('#btn-compute').click(function() {
+  var algo = $('#select-algo option:selected').val();
+
+  if (typeof algo == 'undefined' || !algo) {
+    return;
+  }
+
+  console.log(algo);
+});
 
 $('#btn-reset').click(function() {
   nodeLayer.removeChildren();
@@ -42,3 +52,11 @@ $('#btn-reset').click(function() {
   paper.view.draw();
   nodes = [];
 });
+
+function primsAlgorithm(vertices, callback) {
+
+}
+
+function kruskalsAlgorithm(vertices, callback) {
+
+}
