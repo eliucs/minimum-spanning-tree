@@ -11,6 +11,10 @@ Edge.prototype = {
   contains: function(c) {
     return this.a.equals(c) || this.b.equals(c);
   },
+  equals: function(c) {
+    return (this.a.equals(c.a) && this.b.equals(c.b)) ||
+           (this.a.equals(c.b) && this.b.eqausl(c.a));
+  },
   getA: function() {
     return this.a;
   },

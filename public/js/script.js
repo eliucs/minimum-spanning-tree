@@ -37,15 +37,30 @@ $('#btn-compute').click(function() {
     return;
   }
 
-  console.log(vertices);
+  // console.log(vertices);
 
   if (algo == PRIM) {
-    primsAlgorithm(vertices, function(edges) {
-      // console.log(edges);
+    primsAlgorithm(vertices, function(mst) {
+      if (!mst) {
+        console.log('No nodes on the screen.');
+        return;
+      } else if (typeof mst == 'undefined') {
+        console.log('Cannot make minimum spanning tree with 1 point.');
+        return;
+      }
 
+      mst.forEach(function(edge) {
+        var a = new Point(edge.a.x, edge.a.y);
+        var b = new Point(edge.b.x, edge.b.y);
+        var mstPath = new Path.Line(a, b);
+        mstPath.strokeColor = '#98FB98';
+        mstPath.strokeWidth = 3;
+      });
+
+      // console.log(mst);
     });
   } else if (algo == KRUSKAL) {
-    kruskalsAlgorithm(vertices, function(edges) {
+    kruskalsAlgorithm(vertices, function(mst) {
 
     });
   }
@@ -60,98 +75,76 @@ $('#btn-reset').click(function() {
 });
 
 function primsAlgorithm(vertices, callback) {
-  var edges = [];
-  var mst = []; // array of edges that correspond to building the MST in order
-  var mstVertices = [];
+  var mst = []; // array of Edge
+  var mstVertices = []; // array of Vertex
 
-  // Initialize all edges
+  // Initialize all adjacency lists
   for (var i = 0; i < vertices.length; i++) {
     var current = vertices[i];
-
     for (var j = 0; j < vertices.length; j++) {
       if (j == i) {
         continue;
       }
-
-      var contains = false;
-      edges.forEach(function(edge) {
-        if (edge.contains(current) && edge.contains(vertices[j])) {
-          contains = true;
-        }
-      });
-
-      if (!contains) {
-        edges.push(new Edge(current, vertices[j]));
-      }
+      current.addToAdj(new Edge(current, vertices[j]));
     }
   }
 
-  // Find least weight edge
-  var minEdge = edges[0];
-  var min = 0;
-  for (var i = 1; i < edges.length; i++) {
-    if (edges[i].weight() < minEdge.weight()) {
-      minEdge = edges[i];
-      min = i;
-    }
-  }
-  edges.splice(min, 1);
+  console.log(vertices);
 
-  mst.push(minEdge);
-  mstVertices.push(minEdge.getA());
-  mstVertices.push(minEdge.getB());
-
-  console.log("mst");
-  console.log(mst);
-
-  console.log("mst vertices");
-  console.log(mstVertices);
+  // Find arbitrary vertex to start the algorithm, add to the minimum
+  // spanning tree
+  mstVertices.push(vertices[0]);
 
   while (mstVertices.length != vertices.length) {
-    // Find next smallest edge
-    var minNextEdge = false;
-    var minNext = 0;
-    for (var i = 0; i < edges.length; i++) {
-      for (var j = 0; j < mstVertices.length; j++) {
-        if (!minNextEdge && edges[i].contains(mstVertices[j])) {
-          minNextEdge = edges[i];
-          minNext = i;
-        } else if (edges[i].contains(mstVertices[j]) && edges[i].weight() < minNextEdge.weight()) {
-          minNextEdge = edges[i];
-          minNext = i;
+    var minEdge = false;
+    var minEdgeWeight = Number.MAX_VALUE;
+
+    for (var i = 0; i < mstVertices.length; i++) {
+      for (var j = 0; j < mstVertices[i].adj.length; j++) {
+        var edge = mstVertices[i].adj[j];
+        var vertex = edge.b;
+
+        // Found smaller edge weight
+        if (edge.weight() < minEdgeWeight) {
+          // Make sure that vertex not already in MST
+          if (includesVertex(mstVertices, vertex)) {
+            continue;
+          }
+
+          minEdge = edge;
+          minEdgeWeight = edge.weight();
         }
       }
     }
 
-    edges.splice(min, 1);
-    mst.push(minNextEdge);
-
-    var alreadyContains = false;
-    for (var i = 0; i < mstVertices.length; i++) {
-      if (minNextEdge.getA().equals(mstVertices[i])) {
-        alreadyContains = true;
-      }
-    }
-    if (!alreadyContains) {
-      mstVertices.push(minNextEdge.getA());
-    }
-
-    var alreadyContains = false;
-    for (var i = 0; i < mstVertices.length; i++) {
-      if (minNextEdge.getB().equals(mstVertices[i])) {
-        alreadyContains = true;
-      }
-    }
-    if (!alreadyContains) {
-      mstVertices.push(minNextEdge.getB());
-    }
+    mstVertices.push(minEdge.b);
+    mst.push(minEdge);
   }
 
-  callback(edges);
+  callback(mst);
+  return;
 }
 
 function kruskalsAlgorithm(vertices, callback) {
   var edges = [];
 
   callback(edges);
+}
+
+function includesVertex(vertices, vertex) {
+  for (var i = 0; i < vertices.length; i++) {
+    if (vertices[i].equals(vertex)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function includesEdge(edges, edge) {
+  for (var i = 0; i < edges.length; i++) {
+    if (edges[i].contains(edge.a) && edges[i].contains(edge.b)) {
+      return true;
+    }
+  }
+  return false;
 }

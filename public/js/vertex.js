@@ -1,6 +1,7 @@
 function Vertex(x, y) {
   this.x = x;
   this.y = y;
+  this.adj = [];
 }
 
 Vertex.prototype = {
@@ -10,5 +11,14 @@ Vertex.prototype = {
   },
   equals: function(that) {
     return this.x == that.x && this.y == that.y;
+  },
+  addToAdj: function(vertex) {
+    this.adj.push(vertex);
+  },
+  getAdj: function() {
+    return this.adj;
+  },
+  key: function() {
+    return this.x + ',' + this.y;
   }
 }
