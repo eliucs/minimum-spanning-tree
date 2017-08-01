@@ -10,6 +10,7 @@ var path;
 var vertices = [];
 var verticesLayer = new Layer();
 var edgesLayer = new Layer();
+var mstLayer = new Layer();
 
 function onMouseDown(event) {
   verticesLayer.activate();
@@ -27,9 +28,6 @@ function onMouseDown(event) {
   vertices.push(new Vertex(event.point.x, event.point.y));
 };
 
-// edgesLayer.activate();
-// edgesLayer.removeChildren();
-
 $('#btn-compute').click(function() {
   var algo = $('#select-algo option:selected').val();
 
@@ -37,27 +35,20 @@ $('#btn-compute').click(function() {
     return;
   }
 
-  // console.log(vertices);
+  // Disable computer and reset buttons until animation is finished
+  $('#btn-compute').attr('disabled', true);
+  $('#btn-reset').attr('disabled', true);
 
   if (algo == PRIM) {
     primsAlgorithm(vertices, function(mst) {
-      if (!mst) {
-        console.log('No nodes on the screen.');
-        return;
-      } else if (typeof mst == 'undefined') {
-        console.log('Cannot make minimum spanning tree with 1 point.');
+      if (!mst || typeof mst == 'undefined') {
+        // console.log('No nodes on the screen.');
         return;
       }
 
-      mst.forEach(function(edge) {
-        var a = new Point(edge.a.x, edge.a.y);
-        var b = new Point(edge.b.x, edge.b.y);
-        var mstPath = new Path.Line(a, b);
-        mstPath.strokeColor = '#98FB98';
-        mstPath.strokeWidth = 3;
-      });
-
-      // console.log(mst);
+      mstLayer.activate();
+      mstLayer.removeChildren();
+      drawEdges(mst, 0);
     });
   } else if (algo == KRUSKAL) {
     kruskalsAlgorithm(vertices, function(mst) {
@@ -66,9 +57,29 @@ $('#btn-compute').click(function() {
   }
 });
 
+// Recursively draw edges in minimum spanning tree one by one
+function drawEdges(mst, i) {
+  if (i >= mst.length) {
+    $('#btn-compute').attr('disabled', false);
+    $('#btn-reset').attr('disabled', false);
+    return;
+  }
+
+  setTimeout(function() {
+    var edge = mst[i];
+    var a = new Point(edge.a.x, edge.a.y);
+    var b = new Point(edge.b.x, edge.b.y);
+    var mstPath = new Path.Line(a, b);
+    mstPath.strokeColor = '#98FB98';
+    mstPath.strokeWidth = 3;
+
+    drawEdges(mst, i+1);
+  }, 50);
+}
+
 $('#btn-reset').click(function() {
   verticesLayer.removeChildren();
-  edgesLayer.removeChildren();
+  mstLayer.removeChildren();
   paper.view.draw();
   vertices = [];
   edges = [];
@@ -88,8 +99,6 @@ function primsAlgorithm(vertices, callback) {
       current.addToAdj(new Edge(current, vertices[j]));
     }
   }
-
-  console.log(vertices);
 
   // Find arbitrary vertex to start the algorithm, add to the minimum
   // spanning tree
