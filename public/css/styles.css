@@ -23,13 +23,17 @@ html, body {
 .details-container {
   position: absolute;
   width: auto;
+  height: auto;
   right: 2em;
   bottom: 2em;
 }
 
 @media all and (max-width: 605px) {
   .details-container {
-    display: none;
+    position: absolute;
+    width: auto;
+    height: 8em;
+    top: 1em;
   }
 }
 

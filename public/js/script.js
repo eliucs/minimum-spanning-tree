@@ -42,17 +42,20 @@ $('#btn-compute').click(function() {
   if (algo == PRIM) {
     primsAlgorithm(vertices, function(mst) {
       if (!mst || typeof mst == 'undefined') {
-        // console.log('No nodes on the screen.');
         return;
       }
-
       mstLayer.activate();
       mstLayer.removeChildren();
       drawEdges(mst, 0);
     });
   } else if (algo == KRUSKAL) {
     kruskalsAlgorithm(vertices, function(mst) {
-
+      if (!mst || typeof mst == 'undefined') {
+        return;
+      }
+      mstLayer.activate();
+      mstLayer.removeChildren();
+      drawEdges(mst, 0);
     });
   }
 });
@@ -86,8 +89,8 @@ $('#btn-reset').click(function() {
 });
 
 function primsAlgorithm(vertices, callback) {
-  var mst = []; // array of Edge
-  var mstVertices = []; // array of Vertex
+  var mst = [];
+  var mstVertices = [];
 
   // Initialize all adjacency lists
   for (var i = 0; i < vertices.length; i++) {
@@ -135,9 +138,45 @@ function primsAlgorithm(vertices, callback) {
 }
 
 function kruskalsAlgorithm(vertices, callback) {
+  var mst = [];
+  var mstVertices = [];
   var edges = [];
 
-  callback(edges);
+  // This needs to be fixed by using Min Heap instead of sorting
+  for (var i = 0; i < vertices.length; i++) {
+    var current = vertices[i];
+    for (var j = 0; j < vertices.length; j++) {
+      if (j == i) {
+        continue;
+      }
+      edges.push(new Edge(current, vertices[j]));
+    }
+  }
+
+  edges.sort(function(a, b) {
+    if (a.weight() < b.weight()) {
+      return -1;
+    } else if (a.weight() > b.weight()) {
+      return 1;
+    }
+    return 0;
+  });
+
+  for (var i = 0; i < edges.length; i += 1) {
+    var minEdge = edges[i];
+
+    if (mst.length == vertices.length - 1) {
+      break;
+    }
+
+    if ((!includesVertex(mstVertices, minEdge.a) ||
+        !includesVertex(mstVertices, minEdge.b)) &&
+        !includesEdge(mst, minEdge)) {
+        mst.push(minEdge);
+    }
+  }
+
+  callback(mst);
 }
 
 function includesVertex(vertices, vertex) {
