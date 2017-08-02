@@ -142,7 +142,6 @@ function kruskalsAlgorithm(vertices, callback) {
   var mstVertices = [];
   var edges = [];
 
-  // This needs to be fixed by using Min Heap instead of sorting
   for (var i = 0; i < vertices.length; i++) {
     var current = vertices[i];
     for (var j = 0; j < vertices.length; j++) {
@@ -153,6 +152,9 @@ function kruskalsAlgorithm(vertices, callback) {
     }
   }
 
+  var uf = new UnionFind(vertices.length);
+
+  // This needs to be fixed by using Min Heap instead of sorting
   edges.sort(function(a, b) {
     if (a.weight() < b.weight()) {
       return -1;
@@ -163,16 +165,32 @@ function kruskalsAlgorithm(vertices, callback) {
   });
 
   for (var i = 0; i < edges.length; i += 1) {
-    var minEdge = edges[i];
-
+    // Stop algorithm when length of MST is V-1
     if (mst.length == vertices.length - 1) {
       break;
     }
 
-    if ((!includesVertex(mstVertices, minEdge.a) ||
-        !includesVertex(mstVertices, minEdge.b)) &&
-        !includesEdge(mst, minEdge)) {
-        mst.push(minEdge);
+    var edge = edges[i];
+    var ia = getVertexIndex(vertices, edge.a);
+    var ib = getVertexIndex(vertices, edge.b);
+    var incA = includesVertex(mstVertices, edge.a);
+    var incB = includesVertex(mstVertices, edge.b);
+
+    if (!includesEdge(mst, edge) &&
+        (!incA || !incB) &&
+         uf.find(ia) != uf.find(ib)) {
+
+      mst.push(edge);
+
+      // Push vertex not in mstVertices
+      if (!incA) {
+        mstVertices.push(edge.a);
+      } else {
+        mstVertices.push(edge.b);
+      }
+
+      // Add index of a and b to same union find connected component
+      uf.union(ia, ib);
     }
   }
 
@@ -195,4 +213,13 @@ function includesEdge(edges, edge) {
     }
   }
   return false;
+}
+
+function getVertexIndex(vertices, vertex) {
+  for (var i = 0; i < vertices.length; i++) {
+    if (vertices[i].equals(vertex)) {
+      return i;
+    }
+  }
+  return -1;
 }
