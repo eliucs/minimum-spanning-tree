@@ -35,6 +35,10 @@ $('#btn-compute').click(function() {
     return;
   }
 
+  if (vertices.length == 0) {
+    return;
+  }
+
   // Disable computer and reset buttons until animation is finished
   $('#btn-compute').attr('disabled', true);
   $('#btn-reset').attr('disabled', true);
